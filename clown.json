@@ -1,0 +1,6 @@
+{
+  "extensions": [
+    "./node_modules/@hollowverse/config/clown/common",
+    "./clownOverrides"
+  ]
+}

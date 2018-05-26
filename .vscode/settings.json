@@ -1,0 +1,30 @@
+{
+  "editor.formatOnSave": true,
+  "cSpell.words": [
+    "hollowverse",
+    "loglevel",
+    "promisify",
+    "webpagetest",
+    "unhandledrejection"
+  ],
+  "editor.tabSize": 2,
+  "[json]": {
+    "editor.formatOnSave": true
+  },
+  "files.associations": {
+    "**/.babelrc": "jsonc",
+    "**/.babelrc.json": "jsonc",
+    "**/tslint.json": "jsonc",
+    "**/tsconfig.json": "jsonc",
+    "**/.eslintrc.json": "jsonc"
+  },
+  "typescript.implementationsCodeLens.enabled": true,
+  "typescript.referencesCodeLens.enabled": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.exclude": {
+    "**/node_modules/**": true
+  },
+  "eslint.options": {
+    "reportUnusedDisableDirectives": true
+  }
+}
