@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "streetsidesoftware.code-spell-checker",
+    "eamodio.gitlens",
+    "EditorConfig.editorconfig",
+    "codezombiech.gitignore",
+    "mauve.terraform"
+  ]
+}
