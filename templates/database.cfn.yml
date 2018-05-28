@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Aurora
+
 Parameters:
   NetworkStackName:
     Description: Name of an active CloudFormation stack that contains networking resources
@@ -7,6 +8,7 @@ Parameters:
     MinLength: 1
     MaxLength: 255
     AllowedPattern: '^[a-zA-Z][-a-zA-Z0-9]*$'
+
   DatabaseUser:
     Default: startupadmin
     Type: String
@@ -15,6 +17,7 @@ Parameters:
     MaxLength: 16
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
     ConstraintDescription: Name must begin with a letter and contain only alphanumeric characters
+
   DatabasePassword:
     NoEcho: true
     Type: String
@@ -23,6 +26,7 @@ Parameters:
     MaxLength: 41
     AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Password must contain only alphanumeric characters
+
   DatabaseName:
     Default: StartupDB
     Type: String
@@ -31,6 +35,7 @@ Parameters:
     MaxLength: 30
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
     ConstraintDescription: Name must begin with a letter and contain only alphanumeric characters
+
   DatabaseEngine:
     Default: aurora
     Type: String
@@ -39,6 +44,7 @@ Parameters:
     AllowedValues:
       - aurora
       - aurora-postgresql
+
   EncryptionAtRest:
     Default: false
     Type: String
@@ -47,6 +53,7 @@ Parameters:
     AllowedValues:
       - true
       - false
+
   DatabaseInstanceClass:
     Default: db.t2.small
     Type: String
@@ -64,6 +71,7 @@ Parameters:
       - db.r4.4xlarge
       - db.r4.8xlarge
       - db.r4.16xlarge
+
   EnvironmentName:
     Description: Environment name - development or production
     Type: String
@@ -72,6 +80,7 @@ Parameters:
       - development
       - production
     ConstraintDescription: Specify either development or production
+
   DatabaseAlarmMaxCpuPercent:
     Description: 'Database CPU % max for alarm (currently, Aurora MySQL only)'
     Type: Number
@@ -79,16 +88,19 @@ Parameters:
     MinValue: 1
     MaxValue: 99
     ConstraintDescription: Must be a percentage between 1-99%
+
   DatabaseAlarmReadLatencyMaxSeconds:
     Description: 'Read latency max for alarm (currently, Aurora MySQL only)'
     Type: Number
     Default: 1
     MinValue: 1
+
   DatabaseAlarmWriteLatencyMaxSeconds:
     Description: 'Write latency max for alarm (currently, Aurora MySQL only)'
     Type: Number
     Default: 1
     MinValue: 1
+
   DatabaseAlarmEvaluationPeriods:
     Description: >-
       The number of periods over which data is compared to the specified
@@ -96,6 +108,7 @@ Parameters:
     Type: Number
     Default: 2
     MinValue: 2
+
   DatabaseAlarmEvaluationPeriodSeconds:
     Description: >-
       The time over which the specified statistic is applied. Specify time in
@@ -105,6 +118,7 @@ Parameters:
     Default: 300
     MinValue: 60
     ConstraintDescription: Must be at least 60 seconds
+
   EnhancedMonitoring:
     Default: false
     Type: String
@@ -116,12 +130,14 @@ Parameters:
     AllowedValues:
       - true
       - false
+
   DatabaseAlarmSwapUsageInBytes:
     Default: 209715200
     Type: Number
     Description: Number of swap usage bytes for alarm (if enabled - Aurora MySQL only)
     MinValue: 1
     ConstraintDescription: Enter a value of at least one byte
+
   EnableAlarms:
     Default: false
     Type: String
@@ -132,6 +148,8 @@ Parameters:
     AllowedValues:
       - true
       - false
+
+
 Conditions:
   IsProd: !Equals
     - !Ref EnvironmentName
@@ -149,6 +167,8 @@ Conditions:
     - !Equals
       - !Ref EnhancedMonitoring
       - true
+
+
 Resources:
   EnhancedMonitoringRole:
     Type: 'AWS::IAM::Role'
@@ -178,6 +198,8 @@ Resources:
           'Fn::Sub': '${NetworkStackName}-PrivateSubnet1ID'
         - !ImportValue
           'Fn::Sub': '${NetworkStackName}-PrivateSubnet2ID'
+        - !ImportValue
+          'Fn::Sub': '${NetworkStackName}-PublicSubnet1ID'
       Tags:
         - Key: Name
           Value: !Ref 'AWS::StackName'
@@ -382,6 +404,8 @@ Resources:
       AlarmActions:
         - !Ref DatabaseAlarmTopic
     DependsOn: AuroraCluster
+
+
 Outputs:
   Name:
     Description: Aurora Stack Name

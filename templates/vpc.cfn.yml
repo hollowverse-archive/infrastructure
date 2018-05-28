@@ -55,17 +55,11 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref EnvironmentName
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 8074c520-4818-43c9-8ce9-8d4a7b859c3e
   InternetGatewayAttachment:
     Type: 'AWS::EC2::VPCGatewayAttachment'
     Properties:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 2033df32-32b1-4612-a2dc-3d94bca70ef5
   PublicSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -78,9 +72,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${EnvironmentName} Public Subnet (AZ1)'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 0ab1c3e0-4dba-43de-9aba-fd9df06677f2
   PublicSubnet2:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -93,9 +84,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${EnvironmentName} Public Subnet (AZ2)'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 760b37e3-66f6-48bb-92e5-efec1302fd4e
   PrivateSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -108,9 +96,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${EnvironmentName} Private Subnet (AZ1)'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: a328018c-fd67-47d5-bd80-18ccbb03e941
   PrivateSubnet2:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -123,25 +108,16 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${EnvironmentName} Private Subnet (AZ2)'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 48cbe3de-d4bc-4830-b175-83776586400d
   NatGateway1EIP:
     Type: 'AWS::EC2::EIP'
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: f2c7f1b3-2ec3-4efa-b2ea-3adcd44d87e1
   NatGateway2EIP:
     Type: 'AWS::EC2::EIP'
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: bcb62617-c710-41d0-85e2-695636d38249
   NatGateway1:
     Type: 'AWS::EC2::NatGateway'
     Properties:
@@ -149,9 +125,6 @@ Resources:
         - NatGateway1EIP
         - AllocationId
       SubnetId: !Ref PublicSubnet1
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 04353339-e2ad-448b-b8b9-2ae7e5e90fdf
   NatGateway2:
     Type: 'AWS::EC2::NatGateway'
     Properties:
@@ -159,9 +132,6 @@ Resources:
         - NatGateway2EIP
         - AllocationId
       SubnetId: !Ref PublicSubnet2
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 06c70bfd-90fa-4a98-b8dd-39ab6deb36a8
   PublicRouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -169,9 +139,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${EnvironmentName} Public Routes'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 15d2b1a5-53ce-4096-a2c8-a26b69b3b80e
   DefaultPublicRoute:
     Type: 'AWS::EC2::Route'
     DependsOn: InternetGatewayAttachment
@@ -179,25 +146,16 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: cbd4faf1-6568-4e08-a5dd-ab52c916f5aa
   PublicSubnet1RouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet1
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 001d8b3c-ab14-4bad-b51f-d4c4422e1b39
   PublicSubnet2RouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet2
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 63a77cb5-3741-4d6b-9dd8-9425535529c0
   PrivateRouteTable1:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -205,26 +163,17 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${EnvironmentName} Private Routes (AZ1)'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 419ba840-7989-4b87-96f1-e080f8d915a5
   DefaultPrivateRoute1:
     Type: 'AWS::EC2::Route'
     Properties:
       RouteTableId: !Ref PrivateRouteTable1
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway1
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: adb03690-799a-4ddb-b4fe-74cf34adf46d
   PrivateSubnet1RouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
       RouteTableId: !Ref PrivateRouteTable1
       SubnetId: !Ref PrivateSubnet1
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: aded71ce-8533-488a-ab29-b5ec55a22080
   PrivateRouteTable2:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -232,35 +181,24 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${EnvironmentName} Private Routes (AZ2)'
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: d06440ae-8888-4f17-aed5-267b9a83240e
   DefaultPrivateRoute2:
     Type: 'AWS::EC2::Route'
     Properties:
       RouteTableId: !Ref PrivateRouteTable2
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway2
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: ecc96752-7341-48f8-93d2-e3c62ecfdfdb
   PrivateSubnet2RouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 2965d6b1-4757-49eb-97a9-2d505e0e299a
   NoIngressSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupName: no-ingress-sg
       GroupDescription: Security group with no ingress rule
       VpcId: !Ref VPC
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 09a4d306-1229-496b-89d5-7680b4e37a0b
+
   DbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -278,6 +216,25 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub "${AWS::StackName}-DbSecurityGroup"
+
+  DbAccessSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow traffic from this security group to DB security group
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: !Sub "${AWS::StackName}-DbAccessSecurityGroup"
+
+  DbAccessSecurityGroupToDbIngress:
+    Type: AWS::EC2::SecurityGroupIngress  # prevent security group circular references
+    Properties:
+      GroupId: !Ref DbSecurityGroup
+      IpProtocol: tcp
+      ToPort: 5432
+      FromPort: 3306
+      SourceSecurityGroupId: !Ref DbAccessSecurityGroup
+
 Outputs:
   Name:
     Description: VPC Stack Name
