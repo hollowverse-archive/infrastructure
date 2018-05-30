@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: S3 Bucket used to store logs from various AWS resources
+
+Resources:
+  DeadLetterLogQueue:
+    Type: 'AWS::SQS::Queue'
+
+  LogQueuePolicy:
+    Type: 'AWS::SQS::QueuePolicy'
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Sid: "allow-s3-access-logs-to-send-to-queue"
+          Effect: "Allow"
+          Principal: "*"
+          Action: "SQS:SendMessage"
+          Resource: !GetAtt LogQueue.Arn
+          Condition:
+            ArnLike:
+              aws:SourceArn: !GetAtt Bucket.Arn
+      Queues:
+        - !Ref LogQueue
+
+  LogQueue:
+    DependsOn: DeadLetterLogQueue
+    Type: 'AWS::SQS::Queue'
+    Properties:
+      VisibilityTimeout: 600
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterLogQueue.Arn
+        maxReceiveCount: 10
+
+  Bucket:
+    DependsOn:
+      - LogQueue
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      NotificationConfiguration:
+        QueueConfigurations:
+          -
+            Event: s3:ObjectCreated:*
+            Queue: !GetAtt LogQueue.Arn
+
+Outputs:
+  BucketArn:
+    Value: !GetAtt Bucket.Arn
