@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Aurora
+Description: Aurora Database
 
 Parameters:
   NetworkStackName:
@@ -37,12 +37,12 @@ Parameters:
     ConstraintDescription: Name must begin with a letter and contain only alphanumeric characters
 
   DatabaseEngine:
-    Default: aurora
+    Default: aurora-mysql
     Type: String
     Description: Database engines - Aurora MySQL or Aurora PostgreSQL
     ConstraintDescription: Choose an engine from the drop down
     AllowedValues:
-      - aurora
+      - aurora-mysql
       - aurora-postgresql
 
   EncryptionAtRest:
@@ -131,13 +131,6 @@ Parameters:
       - true
       - false
 
-  DatabaseAlarmSwapUsageInBytes:
-    Default: 209715200
-    Type: Number
-    Description: Number of swap usage bytes for alarm (if enabled - Aurora MySQL only)
-    MinValue: 1
-    ConstraintDescription: Enter a value of at least one byte
-
   EnableAlarms:
     Default: false
     Type: String
@@ -149,14 +142,10 @@ Parameters:
       - true
       - false
 
-
 Conditions:
-  IsProd: !Equals
-    - !Ref EnvironmentName
-    - production
   IsAuroraMySQL: !Equals
-    - !Ref DatabaseEngine
-    - aurora
+      - !Ref DatabaseEngine
+      - aurora-mysql
   AlarmsEnabled: !And
     - !Condition IsAuroraMySQL
     - !Equals
@@ -184,11 +173,13 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole'
+
   DatabaseAlarmTopic:
     Type: 'AWS::SNS::Topic'
     Condition: AlarmsEnabled
     Properties:
       DisplayName: Database Alarm Topic
+
   DatabaseSubnetGroup:
     Type: 'AWS::RDS::DBSubnetGroup'
     Properties:
@@ -198,11 +189,10 @@ Resources:
           'Fn::Sub': '${NetworkStackName}-PrivateSubnet1ID'
         - !ImportValue
           'Fn::Sub': '${NetworkStackName}-PrivateSubnet2ID'
-        - !ImportValue
-          'Fn::Sub': '${NetworkStackName}-PublicSubnet1ID'
       Tags:
         - Key: Name
           Value: !Ref 'AWS::StackName'
+
   AuroraCluster:
     Type: 'AWS::RDS::DBCluster'
     Properties:
@@ -214,7 +204,7 @@ Resources:
       DatabaseName: !Ref DatabaseName
       DBClusterParameterGroupName: !If
         - IsAuroraMySQL
-        - default.aurora5.6
+        - default.aurora-mysql5.7
         - default.aurora-postgresql9.6
       Port: !If
         - IsAuroraMySQL
@@ -224,17 +214,18 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${NetworkStackName}-DatabaseGroupID'
     DependsOn: DatabaseSubnetGroup
-  AuroraInstance0:
+
+  AuroraInstance:
     Type: 'AWS::RDS::DBInstance'
     Properties:
+      PubliclyAccessible: true
       Engine: !Ref DatabaseEngine
       DBClusterIdentifier: !Ref AuroraCluster
       DBInstanceClass: !Ref DatabaseInstanceClass
       DBSubnetGroupName: !Ref DatabaseSubnetGroup
-      StorageEncrypted: !Ref EncryptionAtRest
       DBParameterGroupName: !If
         - IsAuroraMySQL
-        - default.aurora5.6
+        - default.aurora-mysql5.7
         - default.aurora-postgresql9.6
       MonitoringInterval: !If
         - EnhancedMonitoringSupprtedAndEnabled
@@ -251,34 +242,7 @@ Resources:
         - Key: Name
           Value: !Ref 'AWS::StackName'
     DependsOn: AuroraCluster
-  AuroraInstance1:
-    Type: 'AWS::RDS::DBInstance'
-    Condition: IsProd
-    Properties:
-      Engine: !Ref DatabaseEngine
-      DBClusterIdentifier: !Ref AuroraCluster
-      DBInstanceClass: !Ref DatabaseInstanceClass
-      DBSubnetGroupName: !Ref DatabaseSubnetGroup
-      StorageEncrypted: !Ref EncryptionAtRest
-      DBParameterGroupName: !If
-        - IsAuroraMySQL
-        - default.aurora5.6
-        - default.aurora-postgresql9.6
-      MonitoringInterval: !If
-        - EnhancedMonitoringSupprtedAndEnabled
-        - 60
-        - 0
-      MonitoringRoleArn: !If
-        - EnhancedMonitoringSupprtedAndEnabled
-        - !GetAtt
-          - EnhancedMonitoringRole
-          - Arn
-        - !Ref 'AWS::NoValue'
-      CopyTagsToSnapshot: true
-      Tags:
-        - Key: Name
-          Value: !Ref 'AWS::StackName'
-    DependsOn: AuroraCluster
+
   DatabaseCpuAlarm:
     Type: 'AWS::CloudWatch::Alarm'
     Condition: AlarmsEnabled
@@ -304,6 +268,7 @@ Resources:
       AlarmActions:
         - !Ref DatabaseAlarmTopic
     DependsOn: AuroraCluster
+
   DatabaseSelectLatencyAlarm:
     Type: 'AWS::CloudWatch::Alarm'
     Condition: AlarmsEnabled
@@ -329,6 +294,7 @@ Resources:
       AlarmActions:
         - !Ref DatabaseAlarmTopic
     DependsOn: AuroraCluster
+
   DatabaseInsertLatencyAlarm:
     Type: 'AWS::CloudWatch::Alarm'
     Condition: AlarmsEnabled
@@ -354,6 +320,7 @@ Resources:
       AlarmActions:
         - !Ref DatabaseAlarmTopic
     DependsOn: AuroraCluster
+
   DatabaseUpdateLatencyAlarm:
     Type: 'AWS::CloudWatch::Alarm'
     Condition: AlarmsEnabled
@@ -379,6 +346,7 @@ Resources:
       AlarmActions:
         - !Ref DatabaseAlarmTopic
     DependsOn: AuroraCluster
+
   DatabaseDeleteLatencyAlarm:
     Type: 'AWS::CloudWatch::Alarm'
     Condition: AlarmsEnabled
@@ -405,39 +373,44 @@ Resources:
         - !Ref DatabaseAlarmTopic
     DependsOn: AuroraCluster
 
-
 Outputs:
   Name:
     Description: Aurora Stack Name
     Value: !Ref 'AWS::StackName'
     Export:
       Name: !Sub '${AWS::StackName}-Name'
+
   AuroraClusterId:
     Description: Aurora Cluster ID
     Value: !Ref AuroraCluster
     Export:
       Name: !Sub '${AWS::StackName}-AuroraClusterID'
+
   AuroraDbURL:
     Description: Aurora Database URL
     Value: !GetAtt AuroraCluster.Endpoint.Address
     Export:
       Name: !Sub '${AWS::StackName}-DatabaseURL'
+
   AuroraReadDbURL:
     Description: Aurora Database Read URL
     Value: !GetAtt AuroraCluster.ReadEndpoint.Address
     Export:
       Name: !Sub '${AWS::StackName}-DatabaseReadURL'
+
   DbUser:
     Description: RDS Database admin account user
     Value: !Ref DatabaseUser
     Export:
       Name: !Sub '${AWS::StackName}-DatabaseUser'
+
   DatabaseAlarmTopicArn:
     Description: Database Alarm Topic ARN
     Condition: AlarmsEnabled
     Value: !Ref DatabaseAlarmTopic
     Export:
       Name: !Sub '${AWS::StackName}-DatabaseAlarmTopicArn'
+
   DatabaseAlarmTopicName:
     Description: Database Alarm Topic Name
     Condition: AlarmsEnabled
