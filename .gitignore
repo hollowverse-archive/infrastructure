@@ -1,0 +1,5 @@
+# Terraform files
+.terraform
+!.terraform/modules/modules.json
+
+terraform.tfstate*
