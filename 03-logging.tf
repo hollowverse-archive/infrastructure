@@ -4,15 +4,14 @@
 
 # This method of collecting logs is called S3-based SQS in Splunk.
 
-
 # Logs from different AWS resources are stored here for further processing by Splunk
 resource aws_s3_bucket "logging_bucket" {
-  bucket_prefix = "logging-bucket-${var.stage}"
+  bucket_prefix = "hollowverse-logging-bucket-${var.stage}"
 
-  tags = "${merge(local.common_tags)}"
+  tags = "${local.common_tags}"
 }
 
-# This configure the S3 bucket to notify the SQS queue of any new logs
+# This configures the S3 bucket to notify the SQS queue of any new logs
 resource aws_s3_bucket_notification "notification" {
   bucket = "${aws_s3_bucket.logging_bucket.id}"
 
@@ -22,12 +21,11 @@ resource aws_s3_bucket_notification "notification" {
   }
 }
 
-
 # Messages sent to this queue will later be processed by Splunk AWS Add-on
 resource "aws_sqs_queue" "log_queue" {
   name = "${local.log_queue_name}"
 
-  tags = "${merge(local.common_tags)}"
+  tags = "${local.common_tags}"
 
   visibility_timeout_seconds = 600
 
