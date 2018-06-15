@@ -1,6 +1,5 @@
-
 variable "db_name" {
-  type = "string"
+  type    = "string"
   default = "hollowverse"
 }
 
@@ -9,26 +8,23 @@ variable "db_password" {
 }
 
 variable "db_username" {
-  type = "string"
+  type    = "string"
   default = "root"
 }
 
-locals {
-  db_name_with_stage = "${var.db_name}-${var.stage}"
-}
-
 resource "aws_sns_topic" "db_alarms" {
-  name = "${local.db_name_with_stage}-db-alarms"
+  name = "${var.db_name}-db-alarms-${var.stage}"
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name = "${var.stage}/database"
+  name = "${var.stage}/database-3"
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret_latest" {
-  secret_id     = "${aws_secretsmanager_secret.db_secret.id}"
+  secret_id = "${aws_secretsmanager_secret.db_secret.id}"
+
   secret_string = "${jsonencode(map(
-    "host", "${module.hollowverse_db_aurora.cluster_endpoint}",
+    "host", "${aws_rds_cluster.db_cluster.endpoint}",
     "port", 3306,
     "dbname", "${var.db_name}",
     "username", "${var.db_username}",
@@ -36,45 +32,45 @@ resource "aws_secretsmanager_secret_version" "db_secret_latest" {
   ))}"
 }
 
+resource "aws_db_subnet_group" "main" {
+  name       = "db-subnet-group-${var.stage}"
+  subnet_ids = ["${module.vpc.private_subnets}"]
 
-module "hollowverse_db_aurora" {
-  source                          = "claranet/aurora/aws"
-
-  # IMPORTANT: Changing the engine will DESTROY
-  # the currently running database (if any) and create a new, empty one
-  engine                          = "aurora-mysql"
-  engine-version                  = "5.7.12"
-
-  name                            = "${var.db_name}"
-  envname                         = "${var.stage}"
-  envtype                         = "${var.stage}"
-
-  subnets                         = ["${module.vpc.private_subnets}"]
-  azs                             = ["us-east-1a", "us-east-1b"]
-
-  replica_count                   = "1"
-  security_groups                 = ["${aws_security_group.allow_all.id}"]
-  instance_type                   = "db.t2.medium"
-
-  username                        = "${var.db_username}"
-  password                        = "${var.db_password}"
-
-  backup_retention_period         = "1"
-  final_snapshot_identifier       = "${local.db_name_with_stage}-snapshot-final"
-  storage_encrypted               = "true"
-  apply_immediately               = "true"
-  monitoring_interval             = "10"
-
-  cw_alarms                       = true
-  cw_sns_topic                    = "${aws_sns_topic.db_alarms.id}"
-
-  db_parameter_group_name         = "${aws_db_parameter_group.aurora_db_57_parameter_group.id}"
-  db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.aurora_57_cluster_parameter_group.id}"
+  tags = "${local.common_tags}"
 }
 
-resource aws_security_group "allow_all" {
+resource "aws_rds_cluster" "db_cluster" {
+  cluster_identifier = "hollowverse-aurora-cluster-${var.stage}"
+  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+  engine         = "aurora-mysql"
+  engine_version = "5.7.12"
+
+  port = 3306
+
+  database_name   = "${var.db_name}"
+  master_username = "${var.db_username}"
+  master_password = "${var.db_password}"
+
+  vpc_security_group_ids          = ["${aws_security_group.allow_db_access.id}"]
+  db_subnet_group_name            = "${aws_db_subnet_group.main.name}"
+  db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.aurora_57_cluster_parameter_group.name}"
+}
+
+resource "aws_rds_cluster_instance" "cluster_instance_0" {
+  identifier              = "hollowverse-aurora-db-instance-0"
+  cluster_identifier      = "${aws_rds_cluster.db_cluster.id}"
+  instance_class          = "db.t2.medium"
+  publicly_accessible     = true
+  engine                  = "aurora-mysql"
+  engine_version          = "5.7.12"
+  db_subnet_group_name    = "${aws_db_subnet_group.main.name}"
+  db_parameter_group_name = "${aws_db_parameter_group.aurora_db_57_parameter_group.name}"
+}
+
+resource aws_security_group "allow_db_access" {
   vpc_id = "${module.vpc.vpc_id}"
-  name = "Allow access to the database"
+  name   = "Allow access to the database"
 
   ingress {
     protocol    = "tcp"
@@ -85,11 +81,11 @@ resource aws_security_group "allow_all" {
 }
 
 resource "aws_db_parameter_group" "aurora_db_57_parameter_group" {
-  name        = "${local.db_name_with_stage}-aurora-db-57-parameter-group"
-  family      = "aurora-mysql5.7"
+  name   = "${var.db_name}-${var.stage}-aurora-db-57-parameter-group"
+  family = "aurora-mysql5.7"
 }
 
 resource "aws_rds_cluster_parameter_group" "aurora_57_cluster_parameter_group" {
-  name        = "${local.db_name_with_stage}-aurora-57-cluster-parameter-group"
-  family      = "aurora-mysql5.7"
+  name   = "${var.db_name}-${var.stage}-aurora-57-cluster-parameter-group"
+  family = "aurora-mysql5.7"
 }
