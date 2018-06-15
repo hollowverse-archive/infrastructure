@@ -50,8 +50,7 @@ resource "aws_rds_cluster" "db_cluster" {
 
   skip_final_snapshot = true
 
-  engine         = "aurora-mysql"
-  engine_version = "5.7.12"
+  engine = "aurora-mysql"
 
   port = 3306
 
@@ -70,7 +69,6 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
   instance_class          = "db.t2.medium"
   publicly_accessible     = true
   engine                  = "aurora-mysql"
-  engine_version          = "5.7.12"
   db_subnet_group_name    = "${aws_db_subnet_group.main.name}"
   db_parameter_group_name = "${aws_db_parameter_group.aurora_db_57_parameter_group.name}"
 }
