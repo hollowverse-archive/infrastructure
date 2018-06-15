@@ -42,10 +42,10 @@ resource "aws_db_subnet_group" "main" {
 resource "aws_rds_cluster" "db_cluster" {
   cluster_identifier = "hollowverse-aurora-cluster-${var.stage}"
 
-  # IMPORTANT: Due to a bug in AWS provider, this array should list all
-  # the availability zones defined in the VPC to avoid re-creating the
-  # cluster on every `terraform apply` execution, which would destroy all
-  # the data in the databases.
+  # IMPORTANT: Due to what seems to be a bug in AWS provider, this array should
+  # list all the availability zones defined in the VPC to avoid re-creating the
+  # cluster on every `terraform apply` execution, which would destroy all the
+  # data in the databases.
   availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
   skip_final_snapshot = true
