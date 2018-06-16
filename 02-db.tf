@@ -57,7 +57,7 @@ resource "random_id" "db_initialized" {
 }
 
 resource "aws_rds_cluster" "db_cluster" {
-  cluster_identifier = "${var.db_name}-aurora-cluster-${var.stage}"
+  cluster_identifier = "${var.db_name}-cluster-${var.stage}"
 
   # IMPORTANT: Due to what seems to be a bug in AWS provider, this array should
   # list all the availability zones defined in the VPC to avoid re-creating the
@@ -91,7 +91,7 @@ resource "aws_rds_cluster" "db_cluster" {
 # The first database instance in the above cluster will be
 # the writer. Any other instances defined later will be replicas.
 resource "aws_rds_cluster_instance" "cluster_instance_0" {
-  identifier = "hollowverse-aurora-db-instance-0"
+  identifier = "hollowverse-db-instance-${var.stage}-0"
 
   cluster_identifier = "${aws_rds_cluster.db_cluster.id}"
 
