@@ -128,11 +128,13 @@ resource aws_security_group "allow_db_access" {
 resource "aws_db_parameter_group" "aurora_db_57_parameter_group" {
   name   = "${var.db_name}-${var.stage}-aurora-db-57-parameter-group"
   family = "aurora-mysql5.7"
-  tags   = "${local.common_tags}"
+
+  tags = "${local.common_tags}"
 }
 
 resource "aws_rds_cluster_parameter_group" "aurora_57_cluster_parameter_group" {
   name   = "${var.db_name}-${var.stage}-aurora-57-cluster-parameter-group"
   family = "aurora-mysql5.7"
-  tags   = "${local.common_tags}"
+
+  tags = "${local.common_tags}"
 }

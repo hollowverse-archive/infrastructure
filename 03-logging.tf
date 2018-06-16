@@ -2,7 +2,8 @@
 # from different AWS services. This configuration configures an S3 bucket to store
 # the logs, and two SQS queues which will be queried by Splunk.
 
-# This method of collecting logs is called S3-based SQS in Splunk.
+# This method of collecting logs is called SQS-based S3 in Splunk.
+# Reference: http://docs.splunk.com/Documentation/AddOns/released/AWS/SQS-basedS3
 
 # Logs from different AWS resources are stored here for further processing by Splunk
 resource aws_s3_bucket "logging_bucket" {
