@@ -62,12 +62,6 @@ resource "random_id" "db_initialized" {
 resource "aws_rds_cluster" "db_cluster" {
   cluster_identifier = "${var.db_name}-cluster-${var.stage}"
 
-  # IMPORTANT: Due to what seems to be a bug in AWS provider, this array should
-  # list all the availability zones defined in the VPC to avoid re-creating the
-  # cluster on every `terraform apply` execution, which would destroy all the
-  # data in the databases.
-  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
-
   # When this cluster is destroyed, a snapshot of the database data will be
   # automatically created and stored in RDS.
   skip_final_snapshot = false
