@@ -64,7 +64,7 @@ resource "aws_rds_cluster" "db_cluster" {
 
   # When this cluster is destroyed, a snapshot of the database data will be
   # automatically created and stored in RDS.
-  skip_final_snapshot = false
+  skip_final_snapshot = "${var.stage == "production" ? false : true}"
 
   final_snapshot_identifier = "hollowverse-${var.stage}-${random_id.db_initialized.hex}"
 
@@ -119,6 +119,7 @@ resource aws_security_group "allow_db_access" {
     from_port       = "3306"
     to_port         = "3306"
     security_groups = ["${aws_security_group.access_db.id}"]
+    cidr_blocks     = ["165.227.121.211/32"]
   }
 
   egress {
