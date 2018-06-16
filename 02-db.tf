@@ -119,7 +119,6 @@ resource aws_security_group "allow_db_access" {
     from_port       = "3306"
     to_port         = "3306"
     security_groups = ["${aws_security_group.access_db.id}"]
-    cidr_blocks     = ["165.227.121.211/32"]
   }
 
   egress {
