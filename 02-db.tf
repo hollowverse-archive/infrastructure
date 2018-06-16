@@ -43,7 +43,7 @@ resource "aws_db_subnet_group" "main" {
 
   # Databases should typically be in private subnets, for security reasons.
   # Access from other resources is later allowed via security groups.
-  subnet_ids = ["${module.vpc.private_subnets}"]
+  subnet_ids = ["${module.vpc.database_subnets}"]
 
   tags = "${local.common_tags}"
 }
