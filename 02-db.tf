@@ -116,11 +116,18 @@ resource aws_security_group "allow_db_access" {
   tags = "${local.common_tags}"
 
   ingress {
-    protocol    = "tcp"
-    from_port   = "3306"
-    to_port     = "3306"
-    cidr_blocks = ["0.0.0.0/0"]
+    protocol        = "tcp"
+    from_port       = "3306"
+    to_port         = "3306"
+    security_groups = ["${aws_security_group.access_db.id}"]
   }
+}
+
+resource aws_security_group "access_db" {
+  vpc_id = "${module.vpc.vpc_id}"
+  name   = "Resources in this security group can access the database"
+
+  tags = "${local.common_tags}"
 }
 
 # Parameter groups in RDS define a preset of configuration settings
