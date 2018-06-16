@@ -2,18 +2,17 @@ provider "aws" {
   region = "us-east-1"
 }
 
-variable "stage" {
-  type    = "string"
-  default = "development"
-}
-
 terraform {
+  # Store Terraform state in S3, the bucket name is left out
+  # so that it can be passed at initialization time. Variables
+  # cannot be used here.
   backend "s3" {
     key    = "terraform.tfstate"
     region = "us-east-1"
   }
 }
 
+# Use the S3 state
 data "terraform_remote_state" "network" {
   backend = "s3"
 
@@ -22,6 +21,12 @@ data "terraform_remote_state" "network" {
     key    = "terraform.tfstate"
     region = "us-east-1"
   }
+}
+
+variable "stage" {
+  type        = "string"
+  default     = "development"
+  description = "A separate copy of the infrastructure will be created for each stage"
 }
 
 locals {
