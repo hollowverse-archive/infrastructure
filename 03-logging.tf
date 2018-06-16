@@ -7,7 +7,7 @@
 
 # Logs from different AWS resources are stored here for further processing by Splunk
 resource aws_s3_bucket "logging_bucket" {
-  bucket = "hollowverse-logging-bucket-${var.stage}"
+  bucket = "hollowverse-logs-${var.stage}"
 
   tags = "${local.common_tags}"
 }
