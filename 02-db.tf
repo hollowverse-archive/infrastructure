@@ -17,7 +17,10 @@ resource "aws_sns_topic" "db_alarms" {
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name                    = "${var.stage}/database-4"
+  name       = "${var.stage}/database-5"
+  depends_on = ["aws_rds_cluster.db_cluster"]
+
+  # Must be between 7 and 30
   recovery_window_in_days = 7
 
   tags = "${local.common_tags}"
