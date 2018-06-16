@@ -17,7 +17,10 @@ resource "aws_sns_topic" "db_alarms" {
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name = "${var.stage}/database-4"
+  name                    = "${var.stage}/database-4"
+  recovery_window_in_days = 7
+
+  tags = "${local.common_tags}"
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret_latest" {
@@ -33,14 +36,28 @@ resource "aws_secretsmanager_secret_version" "db_secret_latest" {
 }
 
 resource "aws_db_subnet_group" "main" {
-  name       = "db-subnet-group-${var.stage}"
+  name = "db-subnet-group-${var.stage}"
+
+  # Databases should typically be in private subnets, for security reasons.
+  # Access from other resources is later allowed via security groups.
   subnet_ids = ["${module.vpc.private_subnets}"]
 
   tags = "${local.common_tags}"
 }
 
+# Geneate an ID when an environment is initialised
+resource "random_id" "db_initialized" {
+  # `keepers` determine what keeps this random ID from changing every
+  # time `terraform apply` is executed.
+  keepers = {
+    id = "${aws_db_subnet_group.main.name}"
+  }
+
+  byte_length = 8
+}
+
 resource "aws_rds_cluster" "db_cluster" {
-  cluster_identifier = "hollowverse-aurora-cluster-${var.stage}"
+  cluster_identifier = "${var.db_name}-aurora-cluster-${var.stage}"
 
   # IMPORTANT: Due to what seems to be a bug in AWS provider, this array should
   # list all the availability zones defined in the VPC to avoid re-creating the
@@ -48,34 +65,55 @@ resource "aws_rds_cluster" "db_cluster" {
   # data in the databases.
   availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
-  skip_final_snapshot = true
+  # When this cluster is destroyed, a snapshot of the database data will be
+  # automatically created and stored in RDS.
+  skip_final_snapshot = false
 
+  final_snapshot_identifier = "hollowverse-${var.stage}-${random_id.db_initialized.hex}"
+
+  # IMPORTANT: chaging the engine will destroy the cluster and force the
+  # creation of a new one.
   engine = "aurora-mysql"
 
-  port = 3306
+  # IMPORTANT: Do not hardcode `engine_version`, this may force creation of new instances
+  # if a new minor version is released and `auto_minor_version_upgrade` is enabled
+  # (which it is, by default)
 
-  database_name   = "${var.db_name}"
-  master_username = "${var.db_username}"
-  master_password = "${var.db_password}"
-
+  port                            = 3306
+  database_name                   = "${var.db_name}"
+  master_username                 = "${var.db_username}"
+  master_password                 = "${var.db_password}"
   vpc_security_group_ids          = ["${aws_security_group.allow_db_access.id}"]
   db_subnet_group_name            = "${aws_db_subnet_group.main.name}"
   db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.aurora_57_cluster_parameter_group.name}"
 }
 
+# The first database instance in the above cluster will be
+# the writer. Any other instances defined later will be replicas.
 resource "aws_rds_cluster_instance" "cluster_instance_0" {
-  identifier              = "hollowverse-aurora-db-instance-0"
-  cluster_identifier      = "${aws_rds_cluster.db_cluster.id}"
-  instance_class          = "db.t2.medium"
-  publicly_accessible     = true
-  engine                  = "aurora-mysql"
+  identifier = "hollowverse-aurora-db-instance-0"
+
+  cluster_identifier = "${aws_rds_cluster.db_cluster.id}"
+
+  instance_class      = "db.t2.medium"
+  publicly_accessible = true
+
+  engine = "aurora-mysql"
+
+  # IMPORTANT: Do not hardcode `engine_version`, this may force creation of new instances
+  # if a new minor version is released and `auto_minor_version_upgrade` is enabled
+  # (which it is, by default)
+
   db_subnet_group_name    = "${aws_db_subnet_group.main.name}"
   db_parameter_group_name = "${aws_db_parameter_group.aurora_db_57_parameter_group.name}"
+  tags                    = "${local.common_tags}"
 }
 
 resource aws_security_group "allow_db_access" {
   vpc_id = "${module.vpc.vpc_id}"
   name   = "Allow access to the database"
+
+  tags = "${local.common_tags}"
 
   ingress {
     protocol    = "tcp"
@@ -85,12 +123,16 @@ resource aws_security_group "allow_db_access" {
   }
 }
 
+# Parameter groups in RDS define a preset of configuration settings
+# to be applied to any database/cluster defined in that group.
 resource "aws_db_parameter_group" "aurora_db_57_parameter_group" {
   name   = "${var.db_name}-${var.stage}-aurora-db-57-parameter-group"
   family = "aurora-mysql5.7"
+  tags   = "${local.common_tags}"
 }
 
 resource "aws_rds_cluster_parameter_group" "aurora_57_cluster_parameter_group" {
   name   = "${var.db_name}-${var.stage}-aurora-57-cluster-parameter-group"
   family = "aurora-mysql5.7"
+  tags   = "${local.common_tags}"
 }
