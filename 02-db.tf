@@ -121,6 +121,13 @@ resource aws_security_group "allow_db_access" {
     to_port         = "3306"
     security_groups = ["${aws_security_group.access_db.id}"]
   }
+
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    protocol    = -1
+    from_port   = 0
+    to_port     = 0
+  }
 }
 
 resource aws_security_group "access_db" {
@@ -128,6 +135,13 @@ resource aws_security_group "access_db" {
   name   = "Resources in this security group can access the database"
 
   tags = "${local.common_tags}"
+
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    protocol    = -1
+    from_port   = 0
+    to_port     = 0
+  }
 }
 
 # Parameter groups in RDS define a preset of configuration settings
