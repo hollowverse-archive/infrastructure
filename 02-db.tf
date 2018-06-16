@@ -109,6 +109,8 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
   tags                    = "${local.common_tags}"
 }
 
+# The database cluster will use this security group to make
+# the database port open for other resources to access
 resource aws_security_group "allow_db_access" {
   vpc_id = "${module.vpc.vpc_id}"
   name   = "Allow access to the database"
@@ -130,6 +132,10 @@ resource aws_security_group "allow_db_access" {
   }
 }
 
+# Put resources in this security group to be able to access
+# the database. For example, when launching the API Lambda,
+# set the security group to the ID of this one and the
+# lambda function will be able to connect to the database.
 resource aws_security_group "access_db" {
   vpc_id = "${module.vpc.vpc_id}"
   name   = "Resources in this security group can access the database"
