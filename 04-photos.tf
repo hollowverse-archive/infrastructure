@@ -45,7 +45,7 @@ resource aws_cloudfront_distribution "photos_cloudfront_distribution" {
 
   viewer_certificate {
     acm_certificate_arn = "${data.aws_acm_certificate.default_certificate.arn}"
-    ssl_support_method  = "snionly"
+    ssl_support_method  = "sni-only"
   }
 
   origin {

@@ -46,7 +46,7 @@ resource "aws_db_subnet_group" "main" {
 
   # Note: once the subnet group is created, changing this value won't have any
   # effect.
-  subnet_ids = "${module.vpc.database_subnets}"
+  subnet_ids = ["${module.vpc.database_subnets}"]
   tags = "${local.common_tags}"
 }
 
