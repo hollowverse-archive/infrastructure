@@ -37,7 +37,7 @@ data aws_acm_certificate "default_certificate" {
 }
 
 resource aws_cloudfront_distribution "photos_cloudfront_distribution" {
-  enabled = false
+  enabled = true
 
   restrictions {
     geo_restriction {
