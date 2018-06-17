@@ -2,15 +2,13 @@
 # images on hollowverse.com
 
 # An S3 bucket to store unprocessed images (e.g. images of notable people fetched
-# from Wikipedia)
-resource aws_s3_bucket "unprocessed_photos_bucket" {
+# from Wikipedia).
+#
+# We expect this to exist. We do not create it here.
+# It's currently managed by `hollowverse/process-image`.
+# See https://github.com/serverless/serverless/issues/4284
+data aws_s3_bucket "unprocessed_photos_bucket" {
   bucket = "hollowverse-photos-unprocessed-${var.stage}"
-
-  versioning {
-    enabled = true
-  }
-
-  tags = "${local.common_tags}"
 }
 
 # An S3 bucket to store the processed, production-ready photos
