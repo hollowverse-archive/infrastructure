@@ -168,7 +168,7 @@ resource "aws_rds_cluster_parameter_group" "aurora_57_cluster_parameter_group" {
   tags = "${local.common_tags}"
 }
 
-// IAM Role + Policy attach for Enhanced Monitoring
+# IAM Role + Policy attach for Enhanced Monitoring
 data "aws_iam_policy_document" "monitoring_rds_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -181,7 +181,6 @@ data "aws_iam_policy_document" "monitoring_rds_assume_role_policy" {
 }
 
 resource "aws_iam_role" "rds_enhanced_monitoring_role" {
-  count              = "${var.monitoring_interval > 0 ? 1 : 0}"
-  name               = "rds-enhanced-monitoring-${var.envname}"
-  assume_role_policy = "${data.aws_iam_policy_document.monitoring-rds-assume-role-policy.json}"
+  name               = "rds-enhanced-monitoring-${var.stage}"
+  assume_role_policy = "${data.aws_iam_policy_document.monitoring_rds_assume_role_policy.json}"
 }
