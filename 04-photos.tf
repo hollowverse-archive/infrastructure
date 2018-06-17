@@ -28,9 +28,27 @@ resource "aws_cloudfront_origin_access_identity" "origin_access_identity_for_pho
   comment = "Some comment"
 }
 
+data aws_acm_certificate "default_certificate" {
+  most_recent = true
+  statuses    = ["ISSUED"]
+  domain      = "hollowverse.com"
+}
+
 resource aws_cloudfront_distribution "photos_cloudfront_distribution" {
+  enabled = false
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn = "${data.aws_acm_certificate.default_certificate.arn}"
+  }
+
   origin {
-    domain_name = "${aws_s3_bucket.processed_photos_bucket.bucket_regional_domain_name}"
+    domain_name = "${aws_s3_bucket.processed_photos_bucket.bucket_domain_name}"
     origin_id   = "processed-photos-bucket"
 
     s3_origin_config {
@@ -47,12 +65,13 @@ resource aws_cloudfront_distribution "photos_cloudfront_distribution" {
   price_class = "PriceClass_100"
 
   default_cache_behavior {
+    target_origin_id       = "processed-photos-bucket"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
 
-    fowarded_values {
+    forwarded_values {
       query_string = false
 
       cookies {
@@ -61,7 +80,7 @@ resource aws_cloudfront_distribution "photos_cloudfront_distribution" {
     }
   }
 
-  logging {
+  logging_config {
     bucket = "${aws_s3_bucket.logging_bucket.bucket_domain_name}"
     prefix = "photos/"
   }
