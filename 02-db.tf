@@ -70,6 +70,8 @@ resource "aws_rds_cluster" "db_cluster" {
 
   final_snapshot_identifier = "hollowverse-${var.stage}-${random_id.db_initialized.hex}"
 
+  apply_immediately = "${var.stage == "production" ? false : true}"
+
   # IMPORTANT: chaging the engine will destroy the cluster and force the
   # creation of a new one.
   engine = "aurora-mysql"
