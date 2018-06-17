@@ -28,6 +28,8 @@ resource "aws_cloudfront_origin_access_identity" "origin_access_identity_for_pho
   comment = "Some comment"
 }
 
+# We expect a valid certificate to exist in AWS Certificate Manager,
+# issued for hollowverse.com and all subdomains (*.hollowverse.com)
 data aws_acm_certificate "default_certificate" {
   most_recent = true
   statuses    = ["ISSUED"]
