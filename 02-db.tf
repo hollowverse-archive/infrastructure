@@ -99,6 +99,9 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
 
   engine = "aurora-mysql"
 
+  monitoring_interval = 60
+  monitoring_role_arn = "${aws_iam_role.rds_enhanced_monitoring_role.arn}"
+
   # IMPORTANT: Do not hardcode `engine_version`, this may force creation of new instances
   # if a new minor version is released and `auto_minor_version_upgrade` is enabled
   # (which it is, by default)
@@ -163,4 +166,22 @@ resource "aws_rds_cluster_parameter_group" "aurora_57_cluster_parameter_group" {
   family = "aurora-mysql5.7"
 
   tags = "${local.common_tags}"
+}
+
+// IAM Role + Policy attach for Enhanced Monitoring
+data "aws_iam_policy_document" "monitoring_rds_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["monitoring.rds.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "rds_enhanced_monitoring_role" {
+  count              = "${var.monitoring_interval > 0 ? 1 : 0}"
+  name               = "rds-enhanced-monitoring-${var.envname}"
+  assume_role_policy = "${data.aws_iam_policy_document.monitoring-rds-assume-role-policy.json}"
 }
