@@ -16,3 +16,8 @@ resource aws_route53_record "photos" {
     evaluate_target_health = false
   }
 }
+
+# api.hollowverse.com and possibly other subdomains are
+# managed by their respective CloudFormation stacks. See `serverless.yml`
+# files in other Hollowverse repositories.
+
