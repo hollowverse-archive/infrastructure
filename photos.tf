@@ -59,7 +59,7 @@ resource aws_cloudfront_distribution "photos_cloudfront_distribution" {
 
   aliases = "${compact(list(
     "photos-${var.stage}.hollowverse.com",
-    "${var.stage == "production" ? "photos-1.hollowverse.com" : ""}"
+    "${var.stage == "production" ? "photos.hollowverse.com" : ""}"
   ))}"
 
   # Reference: https://aws.amazon.com/cloudfront/pricing/
