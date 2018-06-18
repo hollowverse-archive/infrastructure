@@ -20,15 +20,14 @@
 # See: https://www.davidbegin.com/creating-an-aws-bastion-host-with-terraform/
 #
 # In case you want to connect to a private resource via the bastion instance,
-# See: https://medium.com/@carlos.ribeiro/connecting-on-rds-server-that-is-not-publicly-accessible-1aee9e43b870
+# see: https://medium.com/@carlos.ribeiro/connecting-on-rds-server-that-is-not-publicly-accessible-1aee9e43b870
 resource "aws_instance" "bastion" {
-  ami           = "ami-969ab1f6"
+  ami           = "ami-a4dc46db"                         # Ubuntu 16.04 LTS, eligible for free tier
   key_name      = "${aws_key_pair.bastion_key.key_name}"
-  instance_type = "t2.micro"
+  instance_type = "t2.micro"                             # t2.micro eligible for free tier
 
-  security_groups = [
-    "${aws_security_group.bastion_security_group.name}",
-    "${aws_security_group.access_db.name}",
+  vpc_security_group_ids = [
+    "${aws_security_group.bastion_security_group.id}",
   ]
 
   associate_public_ip_address = true
