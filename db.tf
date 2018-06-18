@@ -189,3 +189,12 @@ resource "aws_iam_role" "rds_enhanced_monitoring_role" {
   name               = "rds-enhanced-monitoring-${var.stage}"
   assume_role_policy = "${data.aws_iam_policy_document.monitoring_rds_assume_role_policy.json}"
 }
+
+output "database_endpoint" {
+  value = "${aws_rds_cluster.db_cluster.endpoint}"
+}
+
+output "database_access_security_group" {
+  value       = "${aws_security_group.access_db.id}"
+  description = "Resources in this security group can connect to the database"
+}
