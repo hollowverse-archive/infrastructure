@@ -22,3 +22,7 @@ module "vpc" {
 
   tags = "${local.common_tags}"
 }
+
+output "database_endpoint" {
+  value = "${aws_rds_cluster.db_cluster.endpoint}"
+}
