@@ -17,7 +17,7 @@ resource "aws_sns_topic" "db_alarms" {
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name       = "${var.stage}/database-7"
+  name       = "${var.stage}/database-8"
   depends_on = ["aws_rds_cluster.db_cluster"]
 
   # Must be between 7 and 30
@@ -46,12 +46,12 @@ resource "aws_db_subnet_group" "main" {
 
   # Note: once the subnet group is created, changing this value won't have any
   # effect.
-  subnet_ids = ["${module.vpc.database_subnets}"]
+  subnet_ids = ["${module.vpc.public_subnets}"]
   tags = "${local.common_tags}"
 }
 
 # Geneate an ID when an environment is initialised
-resource "random_id" "db_initialized" {
+resource "random_id" "snapshot_suffix" {
   # `keepers` determine what keeps this random ID from changing every
   # time `terraform apply` is executed.
   keepers = {
@@ -68,7 +68,7 @@ resource "aws_rds_cluster" "db_cluster" {
   # automatically created and stored in RDS.
   skip_final_snapshot = "${var.stage == "production" ? false : true}"
 
-  final_snapshot_identifier = "hollowverse-${var.stage}-${random_id.db_initialized.hex}"
+  final_snapshot_identifier = "hollowverse-${var.stage}-${random_id.snapshot_suffix.hex}"
 
   apply_immediately = "${var.stage == "production" ? false : true}"
 
@@ -86,7 +86,9 @@ resource "aws_rds_cluster" "db_cluster" {
   master_password                 = "${var.db_password}"
   vpc_security_group_ids          = ["${aws_security_group.allow_db_access.id}"]
   db_subnet_group_name            = "${aws_db_subnet_group.main.name}"
-  db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.aurora_57_cluster_parameter_group.name}"
+  db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.cluster_parameter_group.name}"
+  # Launch this cluster from snapshot
+  snapshot_identifier = "before-migration-to-terraform"
 }
 
 # The first database instance in the above cluster will be
@@ -109,7 +111,7 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
   # (which it is, by default)
 
   db_subnet_group_name    = "${aws_db_subnet_group.main.name}"
-  db_parameter_group_name = "${aws_db_parameter_group.aurora_db_57_parameter_group.name}"
+  db_parameter_group_name = "${aws_db_parameter_group.db_parameter_group.name}"
   tags                    = "${local.common_tags}"
 }
 
@@ -156,15 +158,15 @@ resource aws_security_group "access_db" {
 
 # Parameter groups in RDS define a preset of configuration settings
 # to be applied to any database/cluster defined in that group.
-resource "aws_db_parameter_group" "aurora_db_57_parameter_group" {
-  name   = "${var.db_name}-${var.stage}-aurora-db-57-parameter-group"
+resource "aws_db_parameter_group" "db_parameter_group" {
+  name   = "${var.db_name}-${var.stage}-db-parameter-group"
   family = "aurora-mysql5.7"
 
   tags = "${local.common_tags}"
 }
 
-resource "aws_rds_cluster_parameter_group" "aurora_57_cluster_parameter_group" {
-  name   = "${var.db_name}-${var.stage}-aurora-57-cluster-parameter-group"
+resource "aws_rds_cluster_parameter_group" "cluster_parameter_group" {
+  name   = "${var.db_name}-${var.stage}-cluster-parameter-group"
   family = "aurora-mysql5.7"
 
   tags = "${local.common_tags}"
