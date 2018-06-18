@@ -105,7 +105,7 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
 
   engine = "aurora-mysql"
 
-  monitoring_interval = "0"
+  monitoring_interval = 0
   monitoring_role_arn = "${aws_iam_role.rds_enhanced_monitoring_role.arn}"
 
   # IMPORTANT: Do not hardcode `engine_version`, this may force creation of new instances
@@ -127,8 +127,8 @@ resource aws_security_group "allow_db_access" {
 
   ingress {
     protocol        = "tcp"
-    from_port       = "3306"
-    to_port         = "3306"
+    from_port       = 3306
+    to_port         = 3306
     security_groups = ["${aws_security_group.access_db.id}"]
   }
 
