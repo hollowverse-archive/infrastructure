@@ -21,8 +21,27 @@
 #
 # In case you want to connect to a private resource via the bastion instance,
 # see: https://medium.com/@carlos.ribeiro/connecting-on-rds-server-that-is-not-publicly-accessible-1aee9e43b870
+
+# Find the latest Ubuntu 16.04 AMI
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+# Create the EC2 instance with Ubuntu as the operating system
 resource "aws_instance" "bastion" {
-  ami           = "ami-a4dc46db"                         # Ubuntu 16.04 LTS, eligible for free tier
+  ami           = "${data.aws_ami.ubuntu.id}"            # Ubuntu 16.04 LTS, eligible for free tier
   key_name      = "${aws_key_pair.bastion_key.key_name}"
   instance_type = "t2.micro"                             # t2.micro eligible for free tier
 
@@ -33,6 +52,8 @@ resource "aws_instance" "bastion" {
 
   subnet_id                   = "${module.vpc.public_subnets[0]}"
   associate_public_ip_address = true
+
+  tags = "${local.common_tags}"
 }
 
 resource "aws_security_group" "bastion_security_group" {
