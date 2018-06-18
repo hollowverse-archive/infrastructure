@@ -9,7 +9,7 @@ variable "db_password" {
 
 variable "db_username" {
   type    = "string"
-  default = "root"
+  default = "user"
 }
 
 resource "aws_sns_topic" "db_alarms" {
@@ -80,6 +80,7 @@ resource "aws_rds_cluster" "db_cluster" {
   # if a new minor version is released and `auto_minor_version_upgrade` is enabled
   # (which it is, by default)
 
+  storage_encrypted               = true
   port                            = 3306
   database_name                   = "${var.db_name}"
   master_username                 = "${var.db_username}"
