@@ -22,3 +22,7 @@ module "vpc" {
 
   tags = "${local.common_tags}"
 }
+
+output "public_subnets" {
+  value = "${module.vpc.public_subnets}"
+}
