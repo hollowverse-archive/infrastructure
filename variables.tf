@@ -34,7 +34,6 @@ data "terraform_remote_state" "network_state" {
 
 variable "stage" {
   type        = "string"
-  default     = "development"
   description = "A separate copy of the infrastructure will be created for each stage"
 }
 
