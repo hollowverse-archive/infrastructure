@@ -1,5 +1,0 @@
-{
-  "extends": [
-    "./node_modules/@hollowverse/config/eslint/base/.eslintrc.json"
-  ]
-}
