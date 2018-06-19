@@ -105,7 +105,7 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
 
   engine = "aurora-mysql"
 
-  monitoring_interval = 60
+  monitoring_interval = 0                                                  # Terraform is buggy, even if you change this, it won't take effect
   monitoring_role_arn = "${aws_iam_role.rds_enhanced_monitoring_role.arn}"
 
   # IMPORTANT: Do not hardcode `engine_version`, this may force creation of new instances
