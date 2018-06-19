@@ -86,7 +86,7 @@ variable "public_ssh_key" {
   type = "string"
 
   description = <<DESC
-    The public component of an SSH keypair. Can be generated with ssh-keygen.
+    The public component of an SSH keypair. Can be generated with `ssh-keygen`
     Use the contents of id_rsa.pub
   DESC
 }

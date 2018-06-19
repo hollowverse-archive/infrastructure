@@ -23,7 +23,7 @@ resource aws_s3_bucket "processed_photos_bucket" {
 }
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity_for_photos_bucket" {
-  comment = "Allows CloudFront to access S3 bucket"
+  comment = "Allow CloudFront to access S3 bucket"
 }
 
 # We expect a valid certificate to exist in AWS Certificate Manager,

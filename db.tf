@@ -39,7 +39,7 @@ resource "aws_secretsmanager_secret_version" "db_secret_latest" {
   ))}"
 }
 
-resource "aws_db_subnet_group" "main" {
+resource "aws_db_subnet_group" "main_db_subnet_group" {
   name = "db-subnet-group-${var.stage}"
 
   # Databases should typically be in private subnets, for security reasons.
@@ -56,7 +56,7 @@ resource "random_id" "snapshot_suffix" {
   # `keepers` determine what keeps this random ID from changing every
   # time `terraform apply` is executed.
   keepers = {
-    id = "${aws_db_subnet_group.main.name}"
+    id = "${aws_db_subnet_group.main_db_subnet_group.name}"
   }
 
   byte_length = 8
@@ -86,8 +86,8 @@ resource "aws_rds_cluster" "db_cluster" {
   database_name                   = "${var.db_name}"
   master_username                 = "${var.db_username}"
   master_password                 = "${var.db_password}"
-  vpc_security_group_ids          = ["${aws_security_group.allow_db_access.id}"]
-  db_subnet_group_name            = "${aws_db_subnet_group.main.name}"
+  vpc_security_group_ids          = ["${aws_security_group.allow_db_access_security_group.id}"]
+  db_subnet_group_name            = "${aws_db_subnet_group.main_db_subnet_group.name}"
   db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.cluster_parameter_group.name}"
   # Launch this cluster from snapshot
   snapshot_identifier = "before-migration-to-terraform"
@@ -112,14 +112,14 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
   # if a new minor version is released and `auto_minor_version_upgrade` is enabled
   # (which it is, by default)
 
-  db_subnet_group_name    = "${aws_db_subnet_group.main.name}"
+  db_subnet_group_name    = "${aws_db_subnet_group.main_db_subnet_group.name}"
   db_parameter_group_name = "${aws_db_parameter_group.db_parameter_group.name}"
   tags                    = "${local.common_tags}"
 }
 
 # The database cluster will use this security group to make
 # the database port open for other resources to access
-resource aws_security_group "allow_db_access" {
+resource aws_security_group "allow_db_access_security_group" {
   vpc_id = "${module.vpc.vpc_id}"
   name   = "Allow access to the database"
 
