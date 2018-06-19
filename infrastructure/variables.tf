@@ -3,6 +3,10 @@ provider "aws" {
   version = "1.23.0"
 }
 
+provider "random" {
+  version = "1.3.1"
+}
+
 terraform {
   # Store Terraform state in S3, the bucket name is left out
   # so that it can be passed at initialization time. Variables
