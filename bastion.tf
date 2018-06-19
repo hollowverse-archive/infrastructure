@@ -71,14 +71,23 @@ resource "aws_security_group" "bastion_security_group" {
     # For tighter security, you can restrict to specific IPs by replacing
     # "0.0.0.0/0" with "<IP address>/32".
     cidr_blocks = ["0.0.0.0/0"]
+
+    ipv6_cidr_blocks = [
+      "::/0",
+    ]
   }
 
   # All outgoing traffic from the EC2 instance is allowed.
   egress {
-    protocol    = -1
-    from_port   = 0
-    to_port     = 0
+    protocol  = -1
+    from_port = 0
+    to_port   = 0
+
     cidr_blocks = ["0.0.0.0/0"]
+
+    ipv6_cidr_blocks = [
+      "::/0",
+    ]
   }
 }
 

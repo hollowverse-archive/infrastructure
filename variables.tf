@@ -6,6 +6,9 @@ terraform {
   # Store Terraform state in S3, the bucket name is left out
   # so that it can be passed at initialization time. Variables
   # cannot be used here.
+  #
+  # The bucket name must be "hollowverse-terraform-state-development"
+  # or "hollowverse-terraform-state-production"
   backend "s3" {
     key    = "terraform.tfstate"
     region = "us-east-1"
