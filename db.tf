@@ -17,8 +17,9 @@ resource "aws_sns_topic" "db_alarms" {
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name       = "${var.stage}/database-8"
-  depends_on = ["aws_rds_cluster.db_cluster"]
+  name        = "${var.stage}/database-8"
+  description = "Database connection configuration"
+  depends_on  = ["aws_rds_cluster.db_cluster"]
 
   # Must be between 7 and 30
   recovery_window_in_days = 7
@@ -27,8 +28,7 @@ resource "aws_secretsmanager_secret" "db_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret_latest" {
-  secret_id   = "${aws_secretsmanager_secret.db_secret.id}"
-  description = "Database connection configuration"
+  secret_id = "${aws_secretsmanager_secret.db_secret.id}"
 
   secret_string = "${jsonencode(map(
     "host", "${aws_rds_cluster.db_cluster.endpoint}",
