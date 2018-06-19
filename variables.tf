@@ -15,13 +15,14 @@ terraform {
   # The bucket name must be "hollowverse-terraform-state-development"
   # or "hollowverse-terraform-state-production"
   backend "s3" {
-    key    = "terraform.tfstate"
-    region = "us-east-1"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-lock"
   }
 }
 
 # Use the S3 state
-data "terraform_remote_state" "network" {
+data "terraform_remote_state" "network_state" {
   backend = "s3"
 
   config {
