@@ -82,9 +82,18 @@ resource "aws_security_group" "bastion_security_group" {
   }
 }
 
+variable "public_ssh_key" {
+  type = "string"
+
+  description = <<DESC
+    The public component of an SSH keypair. Can be generated with ssh-keygen.
+    Use the contents of id_rsa.pub
+  DESC
+}
+
 resource "aws_key_pair" "bastion_ssh_key" {
   key_name   = "bastion-ssh-key-${var.stage}"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+4LID5JUM8x6M2vaa3R2K3ga26iYl9lc9z0+y2W3ANlzKXmqesFkYIwIWWM0J1Y5OgJGHrpw96xGynlNG0GLnvtbKFwX3wTo6d0WDRqnBx3blsJ7SI/Yd2d3VmVQQMB/tZG2OGnTDAhpCGdcHQfYzfNIEPf2fBpAhXYMRLjEmFxgyaqzrM0ZGBhKiWatO38V6mz1aeOdQYdinximeeMgr8rsq74wrVYup4p3tBAMTVfiQu6qNFX0UfaHkkYDepy5WT7XneFULKcUONQIp5Gzpf7l3Ay718ug8y7CKvp810TvZem2Z0x/20hMeixv4lvUaemt1/xLvwu9629A/0TQt f@f-X580VD"
+  public_key = "${var.public_ssh_key}"
 }
 
 output "bastion_public_ip" {
