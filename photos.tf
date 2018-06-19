@@ -22,8 +22,9 @@ resource aws_s3_bucket "processed_photos_bucket" {
   tags = "${local.common_tags}"
 }
 
+# Allow CloudFront to access the processed photos bucket
 resource "aws_s3_bucket_policy" "process_photos_s3_bucket_policy" {
-  bucket = "${aws_s3_bucket_policy.processed_photos_bucket.id}"
+  bucket = "${aws_s3_bucket.processed_photos_bucket.id}"
 
   policy = <<POLICY
   {
@@ -37,13 +38,14 @@ resource "aws_s3_bucket_policy" "process_photos_s3_bucket_policy" {
           "AWS": "${aws_cloudfront_origin_access_identity.origin_access_identity_for_photos_bucket.iam_arn}"
         },
         "Action": "s3:GetObject",
-        "Resource": "${aws_s3_bucket_policy.processed_photos_bucket.arn}/*"
+        "Resource": "${aws_s3_bucket.processed_photos_bucket.arn}/*"
       }
     ]
   }
   POLICY
 }
 
+# Create a special CloudFront user that can access S3
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity_for_photos_bucket" {
   comment = "Allow CloudFront to access S3 bucket"
 }
