@@ -40,14 +40,14 @@ data "aws_ami" "ubuntu" {
 }
 
 # Create the EC2 instance with Ubuntu as the operating system
-resource "aws_instance" "bastion" {
-  ami           = "${data.aws_ami.ubuntu.id}"            # Ubuntu 16.04 LTS, eligible for free tier
-  key_name      = "${aws_key_pair.bastion_key.key_name}"
-  instance_type = "t2.micro"                             # t2.micro eligible for free tier
+resource "aws_instance" "bastion_instance" {
+  ami           = "${data.aws_ami.ubuntu.id}"                # Ubuntu 16.04 LTS, eligible for free tier
+  key_name      = "${aws_key_pair.bastion_ssh_key.key_name}"
+  instance_type = "t2.micro"                                 # t2.micro eligible for free tier
 
   vpc_security_group_ids = [
     "${aws_security_group.bastion_security_group.id}",
-    "${aws_security_group.access_db.id}",
+    "${aws_security_group.access_db_security_group.id}",
   ]
 
   subnet_id                   = "${module.vpc.public_subnets[0]}"
@@ -82,11 +82,11 @@ resource "aws_security_group" "bastion_security_group" {
   }
 }
 
-resource "aws_key_pair" "bastion_key" {
+resource "aws_key_pair" "bastion_ssh_key" {
   key_name   = "bastion-ssh-key-${var.stage}"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+4LID5JUM8x6M2vaa3R2K3ga26iYl9lc9z0+y2W3ANlzKXmqesFkYIwIWWM0J1Y5OgJGHrpw96xGynlNG0GLnvtbKFwX3wTo6d0WDRqnBx3blsJ7SI/Yd2d3VmVQQMB/tZG2OGnTDAhpCGdcHQfYzfNIEPf2fBpAhXYMRLjEmFxgyaqzrM0ZGBhKiWatO38V6mz1aeOdQYdinximeeMgr8rsq74wrVYup4p3tBAMTVfiQu6qNFX0UfaHkkYDepy5WT7XneFULKcUONQIp5Gzpf7l3Ay718ug8y7CKvp810TvZem2Z0x/20hMeixv4lvUaemt1/xLvwu9629A/0TQt f@f-X580VD"
 }
 
 output "bastion_public_ip" {
-  value = "${aws_instance.bastion.public_ip}"
+  value = "${aws_instance.bastion_instance.public_ip}"
 }

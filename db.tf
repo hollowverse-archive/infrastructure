@@ -100,12 +100,12 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
 
   cluster_identifier = "${aws_rds_cluster.db_cluster.id}"
 
-  instance_class      = "db.t2.medium"
+  instance_class      = "${var.stage == "production" ? "db.t2.medium" : "db.t2.micro"}"
   publicly_accessible = true
 
   engine = "aurora-mysql"
 
-  monitoring_interval = 0
+  monitoring_interval = 60
   monitoring_role_arn = "${aws_iam_role.rds_enhanced_monitoring_role.arn}"
 
   # IMPORTANT: Do not hardcode `engine_version`, this may force creation of new instances
@@ -129,7 +129,7 @@ resource aws_security_group "allow_db_access" {
     protocol        = "tcp"
     from_port       = 3306
     to_port         = 3306
-    security_groups = ["${aws_security_group.access_db.id}"]
+    security_groups = ["${aws_security_group.access_db_security_group.id}"]
   }
 
   egress {
@@ -144,7 +144,7 @@ resource aws_security_group "allow_db_access" {
 # the database. For example, when launching the API Lambda,
 # set the security group to the ID of this one and the
 # lambda function will be able to connect to the database.
-resource aws_security_group "access_db" {
+resource aws_security_group "access_db_security_group" {
   vpc_id = "${module.vpc.vpc_id}"
   name   = "Resources in this security group can access the database"
 
@@ -196,6 +196,6 @@ output "database_endpoint" {
 }
 
 output "database_access_security_group" {
-  value       = "${aws_security_group.access_db.id}"
+  value       = "${aws_security_group.access_db_security_group.id}"
   description = "Resources in this security group can connect to the database"
 }
