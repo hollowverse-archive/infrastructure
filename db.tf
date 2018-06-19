@@ -17,7 +17,7 @@ resource "aws_sns_topic" "db_alarms" {
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name        = "${var.stage}/database-8"
+  name        = "${var.stage}/database-9"
   description = "Database connection configuration"
   depends_on  = ["aws_rds_cluster.db_cluster"]
 
