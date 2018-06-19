@@ -22,6 +22,28 @@ resource aws_s3_bucket "processed_photos_bucket" {
   tags = "${local.common_tags}"
 }
 
+resource "aws_s3_bucket_policy" "process_photos_s3_bucket_policy" {
+  bucket = "${aws_s3_bucket_policy.processed_photos_bucket.id}"
+
+  policy = <<POLICY
+  {
+    "Version": "2008-10-17",
+    "Id": "PolicyForCloudFrontPrivateContent",
+    "Statement": [
+      {
+        "Sid": "1",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "${aws_cloudfront_origin_access_identity.origin_access_identity_for_photos_bucket.iam_arn}"
+        },
+        "Action": "s3:GetObject",
+        "Resource": "${aws_s3_bucket_policy.processed_photos_bucket.arn}/*"
+      }
+    ]
+  }
+  POLICY
+}
+
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity_for_photos_bucket" {
   comment = "Allow CloudFront to access S3 bucket"
 }
