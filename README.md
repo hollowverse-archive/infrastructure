@@ -30,7 +30,7 @@ It's very important the plan is reviewed carefully before being applied, and pre
 
 We highly recommend that you read [this article](https://blog.gruntwork.io/how-to-use-terraform-as-a-team-251bc1104973) about the guidelines and best practices to follow when using Terraform. The article is somewhat outdated but the following points are still applicable:
 
-- Do not make out-of-band changes to the infrastructure. All updates should be performed via Terraform code. You should not use AWS web console tp make any changes to the resources managed under Terraform. This will cause the Terraform state to be out-of-sync with the actual infrastructure and will confuse Terraform, potentially leading to destructive, hard to fix changes. It will also invalidate the code in the repository as the reproducible true source for the infrastructure.
+- Do not make out-of-band changes to the infrastructure. All updates should be performed via Terraform code. You should not use AWS web console to make any changes to the resources managed under Terraform. This will cause the Terraform state to be out-of-sync with the actual infrastructure and will confuse Terraform, potentially leading to destructive, hard to fix changes. It will also invalidate the code in the repository as the reproducible true source for the infrastructure.
 - Apply changes to a staging environment first. Use a development stage to review and execute the plan before executing it on the production stage.
 - Ask for code review before apply the plan to production.
 
