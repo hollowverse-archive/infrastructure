@@ -26,7 +26,7 @@ Terraform will compare the code in your local version of the repository against 
 
 After you make any changes, [`terraform plan`](https://www.terraform.io/docs/commands/plan.html) will show a list of the resources that need to be updated in place, destroyed, or created from scratch. `plan` won't make any changes to the infrastructure. It will just show what will happen if these changes are applied. [`terraform apply`](https://www.terraform.io/docs/commands/apply.html) will actually execute the plan and update the infrastructure.
 
-It's very important the plan is reviewed carefully before being applied, and preferably reviewed by someone else on the Hollowverse team to make sure no destructive changes are performed inadvertently.
+It's very important the plan is reviewed carefully before being applied, and preferably reviewed by someone else on the Hollowverse team to make sure no destructive changes are performed inadvertently. We recommend that you only use `terraform plan` after you make the desired changes to code and once you are confident that the changes look good, you can open a PR and ask for a review. Once the PR is approved and merged, checkout the upstream `master` branch and apply the changes with `terraform apply`.
 
 We highly recommend that you read [this article](https://blog.gruntwork.io/how-to-use-terraform-as-a-team-251bc1104973) about the guidelines and best practices to follow when using Terraform. The article is somewhat outdated but the following points are still applicable:
 
