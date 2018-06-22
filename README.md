@@ -16,7 +16,7 @@ To update the Hollowverse infrastructure, you need to have administrator privile
 
 Additionally, you need to have access to any sensitive resources that are required to initialize Terraform on your computer. These include the Terraform state that is used in production, which is stored in a private S3 bucket, as well as any other passwords or SSH keys used in the Terraform code.
 
-Once you have Terraform installed, perform `terraform init` in the repository directory to initialize Terraform locally. This requires that you are signed in to your AWS account via the AWS CLI tool.
+Once you have Terraform installed, perform [`terraform init`](https://www.terraform.io/docs/commands/init.html) in the repository directory to initialize Terraform locally. This requires that you are signed in to your AWS account via the AWS CLI tool.
 
 Terraform will try to access the remote state stored in S3, and will ask you for the bucket name that stores this state. Use `hollowverse-terraform-state-development` for the development stage, or `hollowverse-terraform-state-production` for the production stage.
 
@@ -24,7 +24,7 @@ Now that Terraform is initialized, try running `terraform plan`. Terraform will 
 
 Terraform will compare the code in your local version of the repository against the remote state and check what needs to be changed to update the infrastructure. If you did not make any changes, Terraform will simply exit and show that no changes are required.
 
-After you make any changes, `terraform plan` will show a list of the resources that need to be updated in place, destroyed, or created from scratch. `plan` won't make any changes to the infrastructure. It will just show what will happen if these changes are applied. `terraform apply` will actually execute the plan and update the infrastructure.
+After you make any changes, [`terraform plan`](https://www.terraform.io/docs/commands/plan.html) will show a list of the resources that need to be updated in place, destroyed, or created from scratch. `plan` won't make any changes to the infrastructure. It will just show what will happen if these changes are applied. [`terraform apply`](https://www.terraform.io/docs/commands/apply.html) will actually execute the plan and update the infrastructure.
 
 It's very important the plan is reviewed carefully before being applied, and preferably reviewed by someone else on the Hollowverse team to make sure no destructive changes are performed inadvertently.
 
