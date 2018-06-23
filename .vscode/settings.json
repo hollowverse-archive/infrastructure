@@ -1,5 +1,8 @@
 {
   "editor.formatOnSave": true,
-  "cSpell.words": ["hollowverse"],
+  "cSpell.words": [
+    "Terraform",
+    "hollowverse"
+  ],
   "editor.tabSize": 2
 }
