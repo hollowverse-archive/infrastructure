@@ -100,7 +100,7 @@ resource "aws_rds_cluster_instance" "cluster_instance_0" {
 
   cluster_identifier = "${aws_rds_cluster.db_cluster.id}"
 
-  instance_class      = "${var.stage == "production" ? "db.t2.medium" : "db.t2.micro"}"
+  instance_class      = "${var.stage == "production" ? "db.t2.medium" : "db.t2.small"}"
   publicly_accessible = true
 
   engine = "aurora-mysql"
