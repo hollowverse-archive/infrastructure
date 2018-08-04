@@ -38,3 +38,6 @@ Additionally,
 
 - If you are using [VS Code](http://code.visualstudio.com/), use [the extension recommended](./.vscode/extensions.json) in this repository. It will help you navigate the code, jump to definitions of resources, provide autocompletion and documentation for most of the resources. It will also format the code in a consistent style when you save the files.
 - If you are not using VS Code, use `terraform fmt` to format the configuration files for style consistency.
+
+---
+If you need help or wanna get in touch...
