@@ -75,11 +75,10 @@ resource "aws_rds_cluster" "db_cluster" {
 
   # IMPORTANT: chaging the engine will destroy the cluster and force the
   # creation of a new one.
-  engine = "aurora-mysql"
+  engine = "aurora"
 
-  # IMPORTANT: Do not hardcode `engine_version`, this may force creation of new instances
-  # if a new minor version is released and `auto_minor_version_upgrade` is enabled
-  # (which it is, by default)
+  engine_mode    = "serverless"
+  engine_version = "5.6.10a"
 
   storage_encrypted               = true
   port                            = 3306
@@ -89,32 +88,9 @@ resource "aws_rds_cluster" "db_cluster" {
   vpc_security_group_ids          = ["${aws_security_group.allow_db_access_security_group.id}"]
   db_subnet_group_name            = "${aws_db_subnet_group.main_db_subnet_group.name}"
   db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.cluster_parameter_group.name}"
+
   # Launch this cluster from snapshot
   snapshot_identifier = "before-migration-to-terraform"
-}
-
-# The first database instance in the above cluster will be
-# the writer. Any other instances defined later will be replicas.
-resource "aws_rds_cluster_instance" "cluster_instance_0" {
-  identifier = "hollowverse-db-instance-${var.stage}-0"
-
-  cluster_identifier = "${aws_rds_cluster.db_cluster.id}"
-
-  instance_class      = "${var.stage == "production" ? "db.t2.medium" : "db.t2.small"}"
-  publicly_accessible = true
-
-  engine = "aurora-mysql"
-
-  monitoring_interval = 0                                                  # Terraform is buggy, even if you change this, it won't take effect
-  monitoring_role_arn = "${aws_iam_role.rds_enhanced_monitoring_role.arn}"
-
-  # IMPORTANT: Do not hardcode `engine_version`, this may force creation of new instances
-  # if a new minor version is released and `auto_minor_version_upgrade` is enabled
-  # (which it is, by default)
-
-  db_subnet_group_name    = "${aws_db_subnet_group.main_db_subnet_group.name}"
-  db_parameter_group_name = "${aws_db_parameter_group.db_parameter_group.name}"
-  tags                    = "${local.common_tags}"
 }
 
 # The database cluster will use this security group to make
@@ -158,18 +134,9 @@ resource aws_security_group "access_db_security_group" {
   }
 }
 
-# Parameter groups in RDS define a preset of configuration settings
-# to be applied to any database/cluster defined in that group.
-resource "aws_db_parameter_group" "db_parameter_group" {
-  name   = "${var.db_name}-${var.stage}-db-parameter-group"
-  family = "aurora-mysql5.7"
-
-  tags = "${local.common_tags}"
-}
-
 resource "aws_rds_cluster_parameter_group" "cluster_parameter_group" {
   name   = "${var.db_name}-${var.stage}-cluster-parameter-group"
-  family = "aurora-mysql5.7"
+  family = "aurora5.6"
 
   tags = "${local.common_tags}"
 }
