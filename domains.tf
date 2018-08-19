@@ -4,7 +4,8 @@ data aws_route53_zone "hollowverse_zone" {
 }
 
 resource aws_route53_record "photos" {
-  count   = "${length(aws_cloudfront_distribution.photos_cloudfront_distribution.aliases)}"
+  // Regression: dynamic calculation of length(aliases) fails with v1.32 of AWS provider
+  count   = "${var.stage == "production" ? 2 : 1}"
   zone_id = "${data.aws_route53_zone.hollowverse_zone.id}"
 
   type = "A"
