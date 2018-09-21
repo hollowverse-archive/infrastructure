@@ -43,8 +43,3 @@ locals {
     Stage     = "${var.stage}"
   }
 }
-
-locals {
-  log_queue_name             = "logging-queue-${var.stage}"
-  dead_letter_log_queue_name = "logging-dead-letter-queue-${var.stage}"
-}
